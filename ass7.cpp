@@ -1,293 +1,267 @@
 #include <iostream>
-#include <string>
-#include <limits>
-#include <cctype>
 using namespace std;
 
 struct Node {
-    int val;
+    int key;
     Node* left;
     Node* right;
-    bool rightThread; // true if right pointer is a thread (not a real child)
-
-    Node(int val) {
-        val = val;
-        left = nullptr;
-        right = nullptr;
-        rightThread = true;
-    }
+    int rightThread;
 };
 
-Node* insert(Node* root, int val) {
-    Node* ptr = root;
-    Node* par = nullptr;
+Node* createNode(int key) {
+    Node* n = new Node;
+    n->key = key;
+    n->left = nullptr;
+    n->right = nullptr;
+    n->rightThread = 1;
+    return n;
+}
 
-    while (ptr != nullptr) {
-        if (val == ptr->val) {
-            cout << "Duplicate vals not allowed.\n";
-            return root;
-        }
+Node* insert(Node* root, int key) {
+    Node* parent = nullptr;
+    Node* curr = root;
+    int found = 0;
 
-        par = ptr;
-
-        if (val < ptr->val) {
-            if (ptr->left == nullptr)
-                break;
-            ptr = ptr->left;
+    while (curr != nullptr) {
+        if (key == curr->key) {
+            found = 1;
+            curr = nullptr;
+        } else if (key < curr->key) {
+            if (curr->left == nullptr) break;
+            else curr = curr->left;
         } else {
-            if (ptr->rightThread == false)
-                ptr = ptr->right;
+            if (curr->rightThread == 0)
+                curr = curr->right;
             else
                 break;
         }
     }
 
-    Node* temp = new Node(val);
-
-    if (par == nullptr)
-        root = temp;
-    else if (val < par->val) {
-        temp->left = par->left;
-        temp->right = par;
-        par->left = temp;
-    } else {
-        temp->right = par->right;
-        temp->rightThread = true;
-        par->right = temp;
-        par->rightThread = false;
+    if (found == 0) {
+        Node* node = createNode(key);
+        if (parent == nullptr && root == nullptr) root = node;
+        else if (root == nullptr) root = node;
+        else {
+            parent = root;
+            curr = root;
+            Node* prev = nullptr;
+            int dir = 0;
+            while (curr != nullptr) {
+                if (key < curr->key) {
+                    prev = curr;
+                    dir = 0;
+                    curr = curr->left;
+                } else if (curr->rightThread == 0) {
+                    prev = curr;
+                    dir = 1;
+                    curr = curr->right;
+                } else break;
+            }
+            if (key < prev->key) {
+                prev->left = node;
+                node->right = prev;
+            } else {
+                node->right = prev->right;
+                prev->right = node;
+                prev->rightThread = 0;
+            }
+        }
     }
+
     return root;
 }
 
 Node* inorderSuccessor(Node* ptr) {
-    if (ptr->rightThread)
-        return ptr->right;
-    ptr = ptr->right;
-    while (ptr->left != nullptr)
-        ptr = ptr->left;
-    return ptr;
+    Node* res = ptr;
+    if (ptr->rightThread == 1) res = ptr->right;
+    else {
+        res = ptr->right;
+        while (res->left != nullptr) res = res->left;
+    }
+    return res;
 }
 
 void inorder(Node* root) {
-    if (root == nullptr) return;
-    Node* ptr = root;
-    while (ptr->left != nullptr)
-        ptr = ptr->left;
-    while (ptr != nullptr) {
-        cout << ptr->val << " ";
-        ptr = inorderSuccessor(ptr);
+    if (root == nullptr) {
+        cout << endl;
+        return;
     }
+
+    Node* curr = root;
+    while (curr->left != nullptr)
+        curr = curr->left;
+
+    while (curr != nullptr) {
+        cout << curr->key << " ";
+        curr = inorderSuccessor(curr);
+    }
+    cout << endl;
 }
 
 void preorder(Node* root) {
-    if (root == nullptr) return;
-    Node* ptr = root;
-
-    while (ptr != nullptr) {
-        cout << ptr->val << " ";
-
-        if (ptr->left != nullptr)
-            ptr = ptr->left;
-        else if (!ptr->rightThread)
-            ptr = ptr->right;
+    Node* curr = root;
+    while (curr != nullptr) {
+        cout << curr->key << " ";
+        if (curr->left != nullptr)
+            curr = curr->left;
         else {
-            while (ptr != nullptr && ptr->rightThread)
-                ptr = ptr->right;
-            if (ptr != nullptr)
-                ptr = ptr->right;
+            while (curr != nullptr && curr->rightThread == 1)
+                curr = curr->right;
+            if (curr != nullptr)
+                curr = curr->right;
         }
     }
+    cout << endl;
 }
 
-Node* search(Node* root, int val) {
-    Node* ptr = root;
-    while (ptr != nullptr) {
-        if (val == ptr->val)
-            return ptr;
-        else if (val < ptr->val)
-            ptr = ptr->left;
-        else if (ptr->rightThread == false)
-            ptr = ptr->right;
-        else
-            break;
+Node* search(Node* root, int key) {
+    Node* curr = root;
+    Node* res = nullptr;
+    int found = 0;
+    while (curr != nullptr && found == 0) {
+        if (key == curr->key) {
+            res = curr;
+            found = 1;
+        } else if (key < curr->key) curr = curr->left;
+        else if (curr->rightThread == 0) curr = curr->right;
+        else curr = nullptr;
     }
-    return nullptr;
+    return res;
 }
 
-Node* deleteNode(Node* root, int val) {
-    Node* par = nullptr;
-    Node* ptr = root;
-    bool found = false;
+Node* deleteNode(Node* root, int key) {
+    Node* parent = nullptr;
+    Node* curr = root;
+    int found = 0;
 
-    while (ptr != nullptr) {
-        if (val == ptr->val) {
-            found = true;
-            break;
+    while (curr != nullptr && found == 0) {
+        if (key == curr->key) found = 1;
+        else {
+            parent = curr;
+            if (key < curr->key) curr = curr->left;
+            else if (curr->rightThread == 0) curr = curr->right;
+            else curr = nullptr;
         }
-        par = ptr;
-        if (val < ptr->val)
-            ptr = ptr->left;
-        else if (!ptr->rightThread)
-            ptr = ptr->right;
-        else
-            break;
     }
 
-    if (!found) {
-        cout << "val not found.\n";
-        return root;
-    }
+    if (found == 0) return root;
 
-    Node* child = nullptr;
-    if (ptr->left != nullptr && !ptr->rightThread) {
-        // Node with two children
-        Node* parSucc = ptr;
-        Node* succ = ptr->right;
+    // Node has both children
+    if (curr->left != nullptr && curr->rightThread == 0) {
+        Node* parSucc = curr;
+        Node* succ = curr->right;
         while (succ->left != nullptr) {
             parSucc = succ;
             succ = succ->left;
         }
-
-        ptr->val = succ->val;
-        ptr = succ;
-        par = parSucc;
+        curr->key = succ->key;
+        parent = parSucc;
+        curr = succ;
     }
 
-    // Now ptr has at most one child
-    if (ptr->left != nullptr)
-        child = ptr->left;
-    else if (!ptr->rightThread)
-        child = ptr->right;
-    else
-        child = nullptr;
+    Node* child = nullptr;
+    if (curr->left != nullptr)
+        child = curr->left;
+    else if (curr->rightThread == 0)
+        child = curr->right;
 
-    if (par == nullptr)
+    if (parent == nullptr) {
+        delete curr;
         root = child;
-    else if (ptr == par->left)
-        par->left = child;
-    else {
-        if (ptr->rightThread)
-            par->right = ptr->right;
-        else
-            par->right = child;
-    }
-
-    // Fix threads
-    if (child != nullptr) {
-        Node* s = inorderSuccessor(ptr);
-        Node* p = root;
-        while (p != nullptr) {
-            if (p->right == ptr)
-                break;
-            else if (!p->rightThread)
-                p = p->right;
-            else
-                p = nullptr;
+    } else if (curr == parent->left) {
+        parent->left = child;
+        if (child == nullptr) {
+            parent->rightThread = 1;
+            parent->right = curr->right;
+        } else {
+            Node* temp = child;
+            while (temp->rightThread == 0) temp = temp->right;
+            temp->right = curr->right;
         }
-        if (p != nullptr && p->rightThread)
-            p->right = s;
+        delete curr;
+    } else {
+        if (parent->rightThread == 0) {
+            if (child != nullptr) {
+                parent->right = child;
+                Node* temp = child;
+                while (temp->rightThread == 0) temp = temp->right;
+                temp->right = curr->right;
+            } else {
+                parent->rightThread = 1;
+                parent->right = curr->right;
+            }
+        }
+        delete curr;
     }
 
-    delete ptr;
-    cout << "Node deleted successfully.\n";
     return root;
 }
 
-Node* update(Node* root, int oldVal, int newVal) {
-    Node* node = search(root, oldVal);
-    if (node == nullptr) {
-        cout << "Value not found.\n";
-        return root;
+Node* updateKey(Node* root, int oldKey, int newKey) {
+    Node* target = search(root, oldKey);
+    if (target != nullptr) {
+        root = deleteNode(root, oldKey);
+        root = insert(root, newKey);
     }
-    root = deleteNode(root, oldVal);
-    root = insert(root, newVal);
-    cout << "Node updated successfully.\n";
     return root;
 }
 
-bool isValidInteger(const string& str) {
-    if (str.empty()) return false;
-    int start = (str[0] == '+' || str[0] == '-') ? 1 : 0;
-    if (start == str.size()) return false;
-    for (int i = start; i < str.size(); ++i)
-        if (!isdigit(str[i])) return false;
-    return true;
-}
-
-int getValidInteger(const string& prompt) {
-    string input;
-    int val;
-    while (true) {
-        cout << prompt;
-        cin >> input;
-        if (!isValidInteger(input)) {
-            cout << "Invalid input. Enter a valid integer.\n";
-            continue;
-        }
-        try {
-            val = stoi(input);
-            return val;
-        } catch (...) {
-            cout << "Error: Try again.\n";
+void freeTree(Node* root) {
+    Node* curr = root;
+    Node* temp = nullptr;
+    while (curr != nullptr) {
+        if (curr->left != nullptr)
+            curr = curr->left;
+        else {
+            temp = curr;
+            curr = inorderSuccessor(curr);
+            delete temp;
         }
     }
 }
 
 int main() {
     Node* root = nullptr;
-    string choice;
-    int val, newVal;
+    int running = 1, choice, val, oldv, newv;
 
-    while (true) {
-        cout << "\n\n==== Threaded Binary Tree Menu ====\n";
-        cout << "1. Insert Node\n";
-        cout << "2. Delete Node\n";
-        cout << "3. Update Node\n";
-        cout << "4. Search Node\n";
-        cout << "5. Inorder Traversal\n";
-        cout << "6. Preorder Traversal\n";
-        cout << "7. Exit\n";
-        cout << "Choose an option: ";
+    while (running == 1) {
+        cout << "\n===== Threaded Binary Tree (Right Thread Only) =====\n";
+        cout << "1. Insert\n2. Delete\n3. Update Key\n4. Search\n5. Inorder\n6. Preorder\n7. Exit\n";
+        cout << "Enter choice: ";
         cin >> choice;
 
-        if (choice.size() != 1 || choice[0] < '1' || choice[0] > '7') {
-            cout << "Invalid choice. Enter a number 1–7.\n";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        switch (choice[0]) {
-            case '1':
-                val = getValidInteger("Enter value to insert: ");
-                root = insert(root, val);
-                break;
-            case '2':
-                val = getValidInteger("Enter value to delete: ");
-                root = deleteNode(root, val);
-                break;
-            case '3':
-                val = getValidInteger("Enter old value: ");
-                newVal = getValidInteger("Enter new value: ");
-                root = update(root, val, newVal);
-                break;
-            case '4':
-                val = getValidInteger("Enter value to search: ");
-                cout << (search(root, val) ? "Found.\n" : "Not found.\n");
-                break;
-            case '5':
-                cout << "Inorder Traversal: ";
-                inorder(root);
-                cout << endl;
-                break;
-            case '6':
-                cout << "Preorder Traversal: ";
-                preorder(root);
-                cout << endl;
-                break;
-            case '7':
-                cout << "Exiting program...\n";
-                return 0;
-        }
+        if (choice == 1) {
+            cout << "Enter value: ";
+            cin >> val;
+            root = insert(root, val);
+            cout << "Inserted " << val << endl;
+        } else if (choice == 2) {
+            cout << "Enter value: ";
+            cin >> val;
+            root = deleteNode(root, val);
+            cout << "Deleted " << val << " (if existed)\n";
+        } else if (choice == 3) {
+            cout << "Enter old key: ";
+            cin >> oldv;
+            cout << "Enter new key: ";
+            cin >> newv;
+            root = updateKey(root, oldv, newv);
+            cout << "Updated " << oldv << " -> " << newv << endl;
+        } else if (choice == 4) {
+            cout << "Enter value to search: ";
+            cin >> val;
+            Node* f = search(root, val);
+            if (f != nullptr) cout << "Found " << f->key << endl;
+            else cout << val << " not found\n";
+        } else if (choice == 5) {
+            cout << "Inorder: ";
+            inorder(root);
+        } else if (choice == 6) {
+            cout << "Preorder: ";
+            preorder(root);
+        } else if (choice == 7) running = 0;
     }
+
+    freeTree(root);
+    return 0;
 }

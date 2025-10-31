@@ -5,32 +5,32 @@
 using namespace std;
 
 struct Node {
-    int key;
+    int val;
     Node* left;
     Node* right;
     bool rightThread; // true if right pointer is a thread (not a real child)
 
     Node(int val) {
-        key = val;
+        val = val;
         left = nullptr;
         right = nullptr;
         rightThread = true;
     }
 };
 
-Node* insert(Node* root, int key) {
+Node* insert(Node* root, int val) {
     Node* ptr = root;
     Node* par = nullptr;
 
     while (ptr != nullptr) {
-        if (key == ptr->key) {
-            cout << "Duplicate keys not allowed.\n";
+        if (val == ptr->val) {
+            cout << "Duplicate vals not allowed.\n";
             return root;
         }
 
         par = ptr;
 
-        if (key < ptr->key) {
+        if (val < ptr->val) {
             if (ptr->left == nullptr)
                 break;
             ptr = ptr->left;
@@ -42,11 +42,11 @@ Node* insert(Node* root, int key) {
         }
     }
 
-    Node* temp = new Node(key);
+    Node* temp = new Node(val);
 
     if (par == nullptr)
         root = temp;
-    else if (key < par->key) {
+    else if (val < par->val) {
         temp->left = par->left;
         temp->right = par;
         par->left = temp;
@@ -74,7 +74,7 @@ void inorder(Node* root) {
     while (ptr->left != nullptr)
         ptr = ptr->left;
     while (ptr != nullptr) {
-        cout << ptr->key << " ";
+        cout << ptr->val << " ";
         ptr = inorderSuccessor(ptr);
     }
 }
@@ -84,7 +84,7 @@ void preorder(Node* root) {
     Node* ptr = root;
 
     while (ptr != nullptr) {
-        cout << ptr->key << " ";
+        cout << ptr->val << " ";
 
         if (ptr->left != nullptr)
             ptr = ptr->left;
@@ -99,12 +99,12 @@ void preorder(Node* root) {
     }
 }
 
-Node* search(Node* root, int key) {
+Node* search(Node* root, int val) {
     Node* ptr = root;
     while (ptr != nullptr) {
-        if (key == ptr->key)
+        if (val == ptr->val)
             return ptr;
-        else if (key < ptr->key)
+        else if (val < ptr->val)
             ptr = ptr->left;
         else if (ptr->rightThread == false)
             ptr = ptr->right;
@@ -114,18 +114,18 @@ Node* search(Node* root, int key) {
     return nullptr;
 }
 
-Node* deleteNode(Node* root, int key) {
+Node* deleteNode(Node* root, int val) {
     Node* par = nullptr;
     Node* ptr = root;
     bool found = false;
 
     while (ptr != nullptr) {
-        if (key == ptr->key) {
+        if (val == ptr->val) {
             found = true;
             break;
         }
         par = ptr;
-        if (key < ptr->key)
+        if (val < ptr->val)
             ptr = ptr->left;
         else if (!ptr->rightThread)
             ptr = ptr->right;
@@ -134,7 +134,7 @@ Node* deleteNode(Node* root, int key) {
     }
 
     if (!found) {
-        cout << "Key not found.\n";
+        cout << "val not found.\n";
         return root;
     }
 
@@ -148,7 +148,7 @@ Node* deleteNode(Node* root, int key) {
             succ = succ->left;
         }
 
-        ptr->key = succ->key;
+        ptr->val = succ->val;
         ptr = succ;
         par = parSucc;
     }

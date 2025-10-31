@@ -18,54 +18,36 @@ Node* createNode(int key) {
 }
 
 Node* insert(Node* root, int key) {
+    Node* ptr = root;
     Node* parent = nullptr;
-    Node* curr = root;
-    int found = 0;
 
-    while (curr != nullptr) {
-        if (key == curr->key) {
-            found = 1;
-            curr = nullptr;
-        } else if (key < curr->key) {
-            if (curr->left == nullptr) break;
-            else curr = curr->left;
-        } else {
-            if (curr->rightThread == 0)
-                curr = curr->right;
-            else
-                break;
+    while (ptr) {
+        if (key == ptr->key) {
+            cout << "Duplicate key not allowed\n";
+            return root;
         }
+
+        parent = ptr;
+        if (key < ptr->key)
+            ptr = ptr->left;
+        else if (!ptr->rightThread)
+            ptr = ptr->right;
+        else
+            break;
     }
 
-    if (found == 0) {
-        Node* node = createNode(key);
-        if (parent == nullptr && root == nullptr) root = node;
-        else if (root == nullptr) root = node;
-        else {
-            parent = root;
-            curr = root;
-            Node* prev = nullptr;
-            int dir = 0;
-            while (curr != nullptr) {
-                if (key < curr->key) {
-                    prev = curr;
-                    dir = 0;
-                    curr = curr->left;
-                } else if (curr->rightThread == 0) {
-                    prev = curr;
-                    dir = 1;
-                    curr = curr->right;
-                } else break;
-            }
-            if (key < prev->key) {
-                prev->left = node;
-                node->right = prev;
-            } else {
-                node->right = prev->right;
-                prev->right = node;
-                prev->rightThread = 0;
-            }
-        }
+    Node* node = createNode(key);
+
+    if (!parent) {
+        root = node;
+    } else if (key < parent->key) {
+        node->left = nullptr;
+        node->right = parent;
+        parent->left = node;
+    } else {
+        node->right = parent->right;
+        parent->right = node;
+        parent->rightThread = 0;
     }
 
     return root;
@@ -207,17 +189,8 @@ Node* updateKey(Node* root, int oldKey, int newKey) {
 }
 
 void freeTree(Node* root) {
-    Node* curr = root;
-    Node* temp = nullptr;
-    while (curr != nullptr) {
-        if (curr->left != nullptr)
-            curr = curr->left;
-        else {
-            temp = curr;
-            curr = inorderSuccessor(curr);
-            delete temp;
-        }
-    }
+    while (root != nullptr)
+        root = deleteNode(root, root->key);
 }
 
 int main() {

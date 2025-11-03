@@ -195,7 +195,8 @@ void freeTree(Node* root) {
 
 int main() {
     Node* root = nullptr;
-    int running = 1, choice, val, oldv, newv;
+    int running = 1, val, oldv, newv;
+    string choice;
 
     while (running == 1) {
         cout << "\n===== Threaded Binary Tree (Right Thread Only) =====\n";
@@ -203,36 +204,76 @@ int main() {
         cout << "Enter choice: ";
         cin >> choice;
 
-        if (choice == 1) {
-            cout << "Enter value: ";
-            cin >> val;
-            root = insert(root, val);
-            cout << "Inserted " << val << endl;
-        } else if (choice == 2) {
-            cout << "Enter value: ";
-            cin >> val;
-            root = deleteNode(root, val);
-            cout << "Deleted " << val << " (if existed)\n";
-        } else if (choice == 3) {
-            cout << "Enter old key: ";
-            cin >> oldv;
-            cout << "Enter new key: ";
-            cin >> newv;
-            root = updateKey(root, oldv, newv);
-            cout << "Updated " << oldv << " -> " << newv << endl;
-        } else if (choice == 4) {
-            cout << "Enter value to search: ";
-            cin >> val;
-            Node* f = search(root, val);
-            if (f != nullptr) cout << "Found " << f->key << endl;
-            else cout << val << " not found\n";
-        } else if (choice == 5) {
-            cout << "Inorder: ";
-            inorder(root);
-        } else if (choice == 6) {
-            cout << "Preorder: ";
-            preorder(root);
-        } else if (choice == 7) running = 0;
+        bool isNumeric = true;
+        for (char c : choice) {
+            if (!isdigit(c)) {
+                isNumeric = false;
+                break;
+            }
+        }
+
+        if (!isNumeric) {
+            cout << "Invalid input! Please enter a number between 1–7.\n";
+            continue;
+        }
+
+        int ch = stoi(choice);
+
+        switch (ch) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> val;
+                root = insert(root, val);
+                cout << "Inserted " << val << endl;
+                break;
+
+            case 2:
+                cout << "Enter value: ";
+                cin >> val;
+                root = deleteNode(root, val);
+                cout << "Deleted " << val << " (if existed)\n";
+                break;
+
+            case 3:
+                cout << "Enter old key: ";
+                cin >> oldv;
+                cout << "Enter new key: ";
+                cin >> newv;
+                root = updateKey(root, oldv, newv);
+                cout << "Updated " << oldv << " -> " << newv << endl;
+                break;
+
+            case 4:
+                cout << "Enter value to search: ";
+                cin >> val;
+                {
+                    Node* f = search(root, val);
+                    if (f != nullptr)
+                        cout << "Found " << f->key << endl;
+                    else
+                        cout << val << " not found\n";
+                }
+                break;
+
+            case 5:
+                cout << "Inorder: ";
+                inorder(root);
+                break;
+
+            case 6:
+                cout << "Preorder: ";
+                preorder(root);
+                break;
+
+            case 7:
+                running = 0;
+                cout << "Exiting program...\n";
+                break;
+
+            default:
+                cout << "Invalid choice! Please enter a number between 1–7.\n";
+                break;
+        }
     }
 
     freeTree(root);

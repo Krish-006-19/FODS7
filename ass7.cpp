@@ -52,6 +52,13 @@ Node* insert(Node* root, int key) {
         parent->rightThread = 0;
     }
 
+    Node* temp = root;
+    while (temp->right && temp->rightThread == 0)
+        temp = temp->right;
+
+    temp->right = nullptr;
+    temp->rightThread = 0;
+
     return root;
 }
 

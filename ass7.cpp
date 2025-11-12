@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <cctype>
 using namespace std;
 
 struct Node {
@@ -55,10 +57,12 @@ Node* insert(Node* root, int key) {
 
 Node* inorderSuccessor(Node* ptr) {
     Node* res = ptr;
-    if (ptr->rightThread == 1) res = ptr->right;
+    if (ptr->rightThread == 1)
+        res = ptr->right;
     else {
         res = ptr->right;
-        while (res->left != nullptr) res = res->left;
+        while (res->left != nullptr)
+            res = res->left;
     }
     return res;
 }
@@ -98,17 +102,17 @@ void preorder(Node* root) {
 
 Node* search(Node* root, int key) {
     Node* curr = root;
-    Node* res = nullptr;
-    int found = 0;
-    while (curr != nullptr && found == 0) {
-        if (key == curr->key) {
-            res = curr;
-            found = 1;
-        } else if (key < curr->key) curr = curr->left;
-        else if (curr->rightThread == 0) curr = curr->right;
-        else curr = nullptr;
+    while (curr != nullptr) {
+        if (key == curr->key)
+            return curr;
+        else if (key < curr->key)
+            curr = curr->left;
+        else if (curr->rightThread == 0)
+            curr = curr->right;
+        else
+            curr = nullptr;
     }
-    return res;
+    return nullptr;
 }
 
 Node* deleteNode(Node* root, int key) {
@@ -117,18 +121,21 @@ Node* deleteNode(Node* root, int key) {
     int found = 0;
 
     while (curr != nullptr && found == 0) {
-        if (key == curr->key) found = 1;
+        if (key == curr->key)
+            found = 1;
         else {
             parent = curr;
-            if (key < curr->key) curr = curr->left;
-            else if (curr->rightThread == 0) curr = curr->right;
-            else curr = nullptr;
+            if (key < curr->key)
+                curr = curr->left;
+            else if (curr->rightThread == 0)
+                curr = curr->right;
+            else
+                curr = nullptr;
         }
     }
 
     if (found == 0) return root;
-
-    // Node has both children
+    
     if (curr->left != nullptr && curr->rightThread == 0) {
         Node* parSucc = curr;
         Node* succ = curr->right;
@@ -157,7 +164,8 @@ Node* deleteNode(Node* root, int key) {
             parent->right = curr->right;
         } else {
             Node* temp = child;
-            while (temp->rightThread == 0) temp = temp->right;
+            while (temp->rightThread == 0)
+                temp = temp->right;
             temp->right = curr->right;
         }
         delete curr;
@@ -166,7 +174,8 @@ Node* deleteNode(Node* root, int key) {
             if (child != nullptr) {
                 parent->right = child;
                 Node* temp = child;
-                while (temp->rightThread == 0) temp = temp->right;
+                while (temp->rightThread == 0)
+                    temp = temp->right;
                 temp->right = curr->right;
             } else {
                 parent->rightThread = 1;
@@ -193,6 +202,26 @@ void freeTree(Node* root) {
         root = deleteNode(root, root->key);
 }
 
+bool getIntInput(const string& prompt, int& value) {
+    string s;
+    cout << prompt;
+    cin >> s;
+
+    if (s.empty() || (s[0] != '-' && !isdigit(s[0])))
+        return false;
+    for (size_t i = 1; i < s.size(); ++i) {
+        if (!isdigit(s[i]))
+            return false;
+    }
+
+    try {
+        value = stoi(s);
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
 int main() {
     Node* root = nullptr;
     int running = 1, val, oldv, newv;
@@ -204,13 +233,9 @@ int main() {
         cout << "Enter choice: ";
         cin >> choice;
 
-        bool isNumeric = true;
-        for (char c : choice) {
-            if (!isdigit(c)) {
-                isNumeric = false;
-                break;
-            }
-        }
+        bool isNumeric = !choice.empty();
+        for (char c : choice)
+            if (!isdigit(c)) isNumeric = false;
 
         if (!isNumeric) {
             cout << "Invalid input! Please enter a number between 1–7.\n";
@@ -221,31 +246,37 @@ int main() {
 
         switch (ch) {
             case 1:
-                cout << "Enter value: ";
-                cin >> val;
+                if (!getIntInput("Enter value: ", val)) {
+                    cout << "Invalid input! Enter a valid integer.\n";
+                    break;
+                }
                 root = insert(root, val);
                 cout << "Inserted " << val << endl;
                 break;
 
             case 2:
-                cout << "Enter value: ";
-                cin >> val;
+                if (!getIntInput("Enter value: ", val)) {
+                    cout << "Invalid input! Enter a valid integer.\n";
+                    break;
+                }
                 root = deleteNode(root, val);
                 cout << "Deleted " << val << " (if existed)\n";
                 break;
 
             case 3:
-                cout << "Enter old key: ";
-                cin >> oldv;
-                cout << "Enter new key: ";
-                cin >> newv;
+                if (!getIntInput("Enter old key: ", oldv) || !getIntInput("Enter new key: ", newv)) {
+                    cout << "Invalid input! Enter valid integers.\n";
+                    break;
+                }
                 root = updateKey(root, oldv, newv);
                 cout << "Updated " << oldv << " -> " << newv << endl;
                 break;
 
             case 4:
-                cout << "Enter value to search: ";
-                cin >> val;
+                if (!getIntInput("Enter value to search: ", val)) {
+                    cout << "Invalid input! Enter a valid integer.\n";
+                    break;
+                }
                 {
                     Node* f = search(root, val);
                     if (f != nullptr)

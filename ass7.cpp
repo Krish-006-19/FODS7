@@ -235,7 +235,7 @@ int main() {
     string choice;
 
     while (running == 1) {
-        cout << "\n===== Threaded Binary Tree (Right Thread Only) =====\n";
+        cout << "\n===== Threaded Binary Search Tree =====\n";
         cout << "1. Insert\n2. Delete\n3. Update Key\n4. Search\n5. Inorder\n6. Preorder\n7. Exit\n";
         cout << "Enter choice: ";
         cin >> choice;

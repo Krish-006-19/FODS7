@@ -136,6 +136,8 @@ Node* deleteNode(Node* root, int key) {
         cnt++;
     }
 
+    if (found == 0) return root;
+
     if(root->right == nullptr && cnt == 1) {
             Node* temp = root;
             root = root->left;
@@ -143,8 +145,6 @@ Node* deleteNode(Node* root, int key) {
             root->rightThread = 0;
             return root;
     }
-
-    if (found == 0) return root;
     
     if (curr->left != nullptr && curr->rightThread == 0) {
         Node* parSucc = curr;

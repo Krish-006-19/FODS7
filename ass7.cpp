@@ -7,7 +7,7 @@ struct Node {
     int key;
     Node* left;
     Node* right;
-    int rightThread;
+    int rightThread; 
 };
 
 Node* createNode(int key) {
@@ -15,7 +15,7 @@ Node* createNode(int key) {
     n->key = key;
     n->left = nullptr;
     n->right = nullptr;
-    n->rightThread = 1;
+    n->rightThread = 0; 
     return n;
 }
 
@@ -32,7 +32,7 @@ Node* insert(Node* root, int key) {
         parent = ptr;
         if (key < ptr->key)
             ptr = ptr->left;
-        else if (!ptr->rightThread)
+        else if (ptr->rightThread == 0)
             ptr = ptr->right;
         else
             break;
@@ -45,33 +45,26 @@ Node* insert(Node* root, int key) {
     } else if (key < parent->key) {
         node->left = nullptr;
         node->right = parent;
+        node->rightThread = 1;  
         parent->left = node;
     } else {
-        node->right = parent->right;
+        node->right = parent->right; 
+        node->rightThread = parent->rightThread; 
         parent->right = node;
         parent->rightThread = 0;
     }
-
-    Node* temp = root;
-    while (temp->right && temp->rightThread == 0)
-        temp = temp->right;
-
-    temp->right = nullptr;
-    temp->rightThread = 0;
 
     return root;
 }
 
 Node* inorderSuccessor(Node* ptr) {
-    Node* res = ptr;
     if (ptr->rightThread == 1)
-        res = ptr->right;
-    else {
-        res = ptr->right;
-        while (res->left != nullptr)
-            res = res->left;
-    }
-    return res;
+        return ptr->right;
+
+    ptr = ptr->right;
+    while (ptr && ptr->left != nullptr)
+        ptr = ptr->left;
+    return ptr;
 }
 
 void inorder(Node* root) {
@@ -100,6 +93,7 @@ void preorder(Node* root) {
         else {
             while (curr != nullptr && curr->rightThread == 1)
                 curr = curr->right;
+                
             if (curr != nullptr)
                 curr = curr->right;
         }
@@ -126,7 +120,7 @@ Node* deleteNode(Node* root, int key) {
     Node* parent = nullptr;
     Node* curr = root;
     int found = 0;
-
+    int cnt = 0;
     while (curr != nullptr && found == 0) {
         if (key == curr->key)
             found = 1;
@@ -139,6 +133,15 @@ Node* deleteNode(Node* root, int key) {
             else
                 curr = nullptr;
         }
+        cnt++;
+    }
+
+    if(root->right == nullptr && cnt == 1) {
+            Node* temp = root;
+            root = root->left;
+            delete temp;
+            root->rightThread = 0;
+            return root;
     }
 
     if (found == 0) return root;
@@ -309,7 +312,7 @@ int main() {
                 break;
 
             default:
-                cout << "Invalid choice! Please enter a number between 1–7.\n";
+                cout << "Invalid choice! Please enter a number between 1 to 7.\n";
                 break;
         }
     }

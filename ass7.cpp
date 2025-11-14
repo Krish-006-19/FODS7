@@ -45,11 +45,11 @@ Node* insert(Node* root, int key) {
     } else if (key < parent->key) {
         node->left = nullptr;
         node->right = parent;
-        node->rightThread = 1;  
+        node->rightThread = 1;
         parent->left = node;
     } else {
-        node->right = parent->right; 
-        node->rightThread = parent->rightThread; 
+        node->right = parent->right;  
+        node->rightThread = 1; 
         parent->right = node;
         parent->rightThread = 0;
     }
@@ -138,12 +138,17 @@ Node* deleteNode(Node* root, int key) {
 
     if (found == 0) return root;
 
-    if(root->right == nullptr && cnt == 1) {
-            Node* temp = root;
-            root = root->left;
-            delete temp;
-            root->rightThread = 0;
-            return root;
+    if (cnt == 1) { 
+        Node* temp = root;
+        root = root->left;
+
+        if (root != nullptr) {
+            root->right = nullptr;
+            root->rightThread = 1;
+        }
+
+        delete temp;
+        return root;
     }
     
     if (curr->left != nullptr && curr->rightThread == 0) {

@@ -138,7 +138,7 @@ Node* deleteNode(Node* root, int key) {
 
     if (found == 0) return root;
 
-    if (cnt == 1) { 
+    if (cnt == 1 && root->right == nullptr) { 
         Node* temp = root;
         root = root->left;
 

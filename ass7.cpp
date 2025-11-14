@@ -144,7 +144,7 @@ Node* deleteNode(Node* root, int key) {
 
         if (root != nullptr) {
             root->right = nullptr;
-            root->rightThread = 1;
+            root->rightThread = 0;
         }
 
         delete temp;
